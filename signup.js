@@ -85,4 +85,75 @@ function validateForm() {
     }
 
     // Phone optional but still validate if entered
+    const phonePattern = /^\d{3}[-.]?\d{3}[-.]?\d{4}$/;
+
+    if (phone.value.trim() !== "" && !phonePattern.test(phone.value.trim())
+    ) {
+        phone.classList.add("is-invalid");
+        valid = false;
+    }
+    else {
+        phone.classList.remove("is-invalid");
+    }
+
+    // Address validation
+    if (address.value.trim() === "") {
+        address.classList.add("is-invalid");
+        valid = false;
+    }
+    else {
+        phone.classList.remove("is-invalid")
+    }
+
+    return valid;
+}
+
+function displayAttendees() {
+    attendeeTable.innerHTML = "";
+
+    attendees.forEach(function(attendee, index) {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${attendee.fullName}</td>
+            <td>${attendee.age}</td>
+            <td>${attendee.email}</td>
+            <td>${attendee.phone || "N/A"}</td>
+            <td>${attendee.address}</td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="editAttendee(${index})">
+                Update</button>
+            </td>
+        `;
+
+        attendeeTable.appendChild(row);
+    });
+}
+
+function editAttendee(index) {
+    const attendee = attendees[index];
+
+    document.getElementById("fullName").value = attendee.fullName;
+
+    document.getElementById("age").value = attendee.age;
+
+    document.getElementById("email").value = attendee.email;
+
+    document.getElementById("phone").value = attendee.phone;
+
+    document.getElementById("address").value = attendee.address;
+
+    editIndex = index;
+
+    submitButton.textContent = "Save Changes";
+
+    window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+// Load saved JSON data when page opens
+const savedAttendees = localStorage.getItem("conferenceAttendees");
+
+if (savedAttendees) {
+    attendees = JSON.parse(savedAttendees);
+    displayAttendees();
 }
