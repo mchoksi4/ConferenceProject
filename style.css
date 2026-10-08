@@ -1,0 +1,105 @@
+/* General Page Styling */
+
+body {
+  font-family: Arial, sans-serif;
+  color: #212529;
+}
+
+/* Navigation */
+
+.navbar-brand {
+  font-size: 1.25rem;
+}
+
+.navbar .nav-link {
+  margin-left: 10px;
+}
+
+.navbar .nav-link:hover {
+  text-decoration: underline;
+}
+
+/* Hero Section */
+
+.hero-section {
+  background-color: #e9f2ff;
+  padding: 80px 20px;
+}
+
+.hero-section h1 {
+  color: #0d6efd;
+}
+
+.hero-section p {
+  font-size: 1.1rem;
+}
+
+/* Homepage Cards */
+
+.card h3 {
+  color: #0d6efd;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  transition: 0.2s;
+}
+
+/* Schedule */
+
+#schedule {
+  background-color: #f8f9fa;
+}
+
+/* Registration Button */
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+/* Footer */
+
+footer {
+  margin-top: 0;
+}
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+  .navbar .nav-link {
+    margin-left: 0;
+  }
+
+  .hero-section {
+    padding: 50px 20px;
+  }
+}
+/* Hero Section */
+
+.hero-section {
+  background-color: #e9f2ff;
+  padding: 80px 20px;
+}
+
+.hero-section h1 {
+  color: #0d6efd;
+}
+
+.hero-section img {
+  width: 100%;
+  max-height: 350px;
+  object-fit: cover;
+}
+/* Conference Image */
+
+.hero-section img {
+  width: 100%;
+  max-height: 350px;
+  object-fit: cover;
+}
