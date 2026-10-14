@@ -1,0 +1,16 @@
+[
+  {
+    "sessionId": "SES001",
+    "sessionTitle": "Registration & Networking",
+    "sessionCategory": "Networking",
+    "sessionFormat": "Networking Session",
+    "sessionInfo": "Welcome and meet other participants."
+  },
+  {
+    "sessionId": "SES002",
+    "sessionTitle": "Career Success Workshop",
+    "sessionCategory": "Career Development",
+    "sessionFormat": "Workshop",
+    "sessionInfo": "Learn career planning strategies."
+  }
+]

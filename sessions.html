@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Conference Session Management</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Your existing stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand" href="index.html"> Career Conference </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarMenu"
+          aria-controls="navbarMenu"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarMenu">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="attendees.html">
+                Attendee Registration
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                aria-current="page"
+                href="sessions.html"
+              >
+                Manage Sessions
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page Heading -->
+    <header class="container text-center py-5">
+      <h1>Conference Session Management</h1>
+      <p class="lead">
+        Add, update, and search conference sessions and workshops.
+      </p>
+    </header>
+
+    <main class="container pb-5">
+      <!-- Session Form -->
+      <section class="card shadow-sm mb-5">
+        <div class="card-header bg-primary text-white">
+          <h2 class="h4 mb-0" id="formHeading">Add a Conference Session</h2>
+        </div>
+
+        <div class="card-body">
+          <form id="sessionForm" novalidate>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="sessionId" class="form-label"> Session ID </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="sessionId"
+                  placeholder="Example: SES001"
+                  required
+                />
+                <div class="invalid-feedback">Please enter a session ID.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="sessionTitle" class="form-label">
+                  Session Title
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="sessionTitle"
+                  placeholder="Enter the session title"
+                  required
+                />
+                <div class="invalid-feedback">
+                  Please enter a session title.
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="sessionCategory" class="form-label">
+                  Session Category
+                </label>
+                <select class="form-select" id="sessionCategory" required>
+                  <option value="">Choose a category</option>
+                  <option value="Networking">Networking</option>
+                  <option value="Career Development">Career Development</option>
+                  <option value="Professional Development">
+                    Professional Development
+                  </option>
+                </select>
+                <div class="invalid-feedback">Please select a category.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="sessionFormat" class="form-label">
+                  Session Format
+                </label>
+                <select class="form-select" id="sessionFormat" required>
+                  <option value="">Choose a format</option>
+                  <option value="Networking Session">Networking Session</option>
+                  <option value="Workshop">Workshop</option>
+                  <option value="Lunch">Lunch</option>
+                  <option value="Closing Session">Closing Session</option>
+                </select>
+                <div class="invalid-feedback">
+                  Please select a session format.
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label for="sessionInfo" class="form-label">
+                  Additional Information (Optional)
+                </label>
+                <textarea
+                  class="form-control"
+                  id="sessionInfo"
+                  rows="3"
+                  placeholder="Enter the time, room, duration, or speaker"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <button type="submit" class="btn btn-primary" id="submitButton">
+                Add Session
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="cancelButton"
+                hidden
+              >
+                Cancel Update
+              </button>
+
+              <button
+                type="reset"
+                class="btn btn-outline-secondary"
+                id="clearButton"
+              >
+                Clear Form
+              </button>
+            </div>
+
+            <div
+              id="formMessage"
+              class="mt-3"
+              role="status"
+              aria-live="polite"
+            ></div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Session Search and Table -->
+      <section>
+        <div
+          class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3"
+        >
+          <h2 class="h3 mb-0">Current Conference Sessions</h2>
+
+          <div>
+            <label for="searchInput" class="form-label">
+              Search sessions
+            </label>
+            <input
+              type="search"
+              class="form-control"
+              id="searchInput"
+              placeholder="Search by title, category, or format"
+            />
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table
+            class="table table-striped table-hover table-bordered align-middle"
+            id="sessionTable"
+          >
+            <thead class="table-primary">
+              <tr>
+                <th scope="col">Session ID</th>
+                <th scope="col">Session Title</th>
+                <th scope="col">Category</th>
+                <th scope="col">Format</th>
+                <th scope="col">Additional Information</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="sessionTableBody">
+              <!-- JavaScript will insert sessions here -->
+            </tbody>
+          </table>
+        </div>
+
+        <p id="emptyMessage" class="text-muted">
+          Sessions will appear here when the page loads.
+        </p>
+      </section>
+    </main>
+
+    <footer class="bg-dark text-white text-center py-3">
+      <p class="mb-0">Career Conference &copy; 2026</p>
+    </footer>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery, required for search/filter functionality -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Session management logic -->
+    <script src="sessions.js"></script>
+  </body>
+</html>

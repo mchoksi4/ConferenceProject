@@ -1,9 +1,16 @@
 [
   {
+    "fullName": "Mylenna Choksi",
+    "age": "28",
+    "email": "mvc6803@psu.edu",
+    "phone": "984-259-5727",
+    "address": "123 Main Street, Charlotte, NC"
+  },
+  {
     "fullName": "John Smith",
-    "age": "21",
+    "age": "23",
     "email": "john2345@psu.edu",
     "phone": "123-456-7890",
-    "address": "890 Main Street,Charlotte, NC"
+    "address": "890 Main Street, Charlotte, NC"
   }
 ]
