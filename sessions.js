@@ -238,6 +238,19 @@ exportButton.addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
+function fixSessionData(data) {
+    return data.map(function(s) {
+        return {
+            sessionId: s.sessionId || s.id || "",
+            sessionTitle: s.sessionTitle || s.description || "",
+            sessionCategory: s.sessionCategory || s.category || "",
+            sessionFormat: s.sessionFormat || s.format || "",
+            sessionInfo: s.sessionInfo || s.speaker || "",
+            price: Number(s.price) || 0
+        };
+    });
+}
+
 async function loadSessions() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -246,7 +259,8 @@ async function loadSessions() {
       const parsed = JSON.parse(saved);
 
       if (Array.isArray(parsed)) {
-        sessions = parsed;
+        sessions = fixSessionData(parsed);
+        saveSessions();
         renderSessions();
         return;
       }
@@ -264,7 +278,7 @@ async function loadSessions() {
       throw new Error("sessions.json must contain an array.");
     }
 
-    sessions = data;
+    sessions = fixSessionData(data);
     saveSessions();
     renderSessions();
 
