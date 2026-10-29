@@ -194,8 +194,6 @@ $("#downloadButton").on("click", function() {
     URL.revokeObjectURL(url);
 });
 
-// AJAX code for a future RESTful API.
-// Intentionally disabled until an API exists.
 $("#sendButton").on("click", function() {
     if (cart.length === 0) {
         message("Add a session before sending your cart.", false);
