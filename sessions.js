@@ -179,6 +179,7 @@ sessionForm.addEventListener("submit", (event) => {
   saveSessions();
   renderSessions();
   resetSessionForm();
+  showMessage("Session added successfully!", "success");
 });
 
 function deleteSession(id) {
