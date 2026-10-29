@@ -211,6 +211,20 @@ $("#sendButton").on("click", function() {
 
 });
 
+// Fix issues with different session formats for loading previous data.
+function fixSessionData(data) {
+    return data.map(function(s) {
+        return {
+            id: s.id || s.sessionId,
+            description: s.description || s.sessionTitle,
+            category: s.category || s.sessionCategory,
+            format: s.format || s.sessionFormat,
+            price: s.price === undefined ? 0: Number(s.price),
+            speaker: s.speaker || s.sessionInfo || ""
+        };
+    });
+}
+
 // Load existing changes, or start with the sessions.json document.
 const savedSessions = localStorage.getItem("conferenceSessions");
 const savedCart = localStorage.getItem("conferenceCart");
