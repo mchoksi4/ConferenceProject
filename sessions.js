@@ -17,6 +17,7 @@ const cancelButton = document.getElementById("cancelButton");
 const formMessage = document.getElementById("formMessage");
 const emptyMessage = document.getElementById("emptyMessage");
 const searchInput = document.getElementById("searchInput");
+const sessionPriceInput = document.getElementById("sessionPrice");
 
 function saveSessions() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
@@ -47,6 +48,7 @@ function renderSessions() {
     row.appendChild(createCell(session.sessionCategory));
     row.appendChild(createCell(session.sessionFormat));
     row.appendChild(createCell(session.sessionInfo));
+    row.appendChild(createCell("$" + Number(session.price ?? 0).toFixed(2)));
 
     const actionsCell = document.createElement("td");
 
@@ -109,7 +111,8 @@ function editSession(id) {
   sessionTitleInput.value = session.sessionTitle;
   sessionCategoryInput.value = session.sessionCategory;
   sessionFormatInput.value = session.sessionFormat;
-  sessionInfoInput.value = session.sessionInfo || "";
+  sessionInfoInput.value = session.sessionInfo || ""
+  sessionPriceInput.value = session.price ?? 0;
 
   sessionIdInput.readOnly = true;
   formHeading.textContent = "Update Conference Session";
@@ -138,6 +141,7 @@ sessionForm.addEventListener("submit", (event) => {
     sessionCategory: sessionCategoryInput.value,
     sessionFormat: sessionFormatInput.value,
     sessionInfo: sessionInfoInput.value.trim(),
+    price: Number(sessionPriceInput.value)
   };
 
   if (!session.sessionId || !session.sessionTitle) {
