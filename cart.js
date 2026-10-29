@@ -15,6 +15,16 @@ function saveData() {
 }
 
 function money(price) {
+    if (price === undefined || price === null || price === "") {
+        return "$0.00";
+    }
+
+    let amount = Number(price);
+
+    if (isNaN(amount)) {
+        return "$0.00";
+    }
+    
     return "$" + Number(price).toFixed(2);
 }
 
