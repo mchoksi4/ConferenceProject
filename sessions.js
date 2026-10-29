@@ -131,6 +131,12 @@ sessionForm.addEventListener("submit", (event) => {
   sessionForm.classList.add("was-validated");
 
   if (!sessionForm.checkValidity()) {
+    const invalidFields = sessionForm.querySelectorAll(":invalid");
+
+    invalidFields.forEach(function(field) {
+      console.log("Invalid field:", field.id, field.value);
+    });
+
     showMessage("Please complete all required fields.", "danger");
     return;
   }
@@ -151,9 +157,12 @@ sessionForm.addEventListener("submit", (event) => {
 
   if (editingSessionId === null) {
     const duplicate = sessions.some(
-      (item) =>
-        item.sessionId.toLowerCase() === session.sessionId.toLowerCase(),
-    );
+      function(item) {
+        const id = item.sessionId || item.id || "";
+
+        return id.toLowerCase() === session.sessionId.toLowerCase();
+      });
+    
 
     if (duplicate) {
       showMessage("That Session ID already exists.", "danger");
@@ -179,7 +188,7 @@ sessionForm.addEventListener("submit", (event) => {
   saveSessions();
   renderSessions();
   resetSessionForm();
-  showMessage("Session added successfully!", "success");
+  showMessage("Session saved successfully!", "success");
 });
 
 function deleteSession(id) {
