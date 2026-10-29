@@ -30,7 +30,7 @@ function showMessage(message, type) {
 
 function createCell(value) {
   const cell = document.createElement("td");
-  cell.textContent = value || "—";
+  cell.textContent = value ?? "—";
   return cell;
 }
 
