@@ -238,7 +238,7 @@ try {
 
 if (savedSessions !== null) {
     try {
-        sessions = JSON.parse(savedSessions);
+        sessions = fixSessionData(JSON.parse(savedSessions));
 
         if (!Array.isArray(sessions)) {
             throw new Error("Invalid sessions");
@@ -251,7 +251,7 @@ if (savedSessions !== null) {
     }
 } else {
     $.getJSON("sessions.json", function(data) {
-        sessions = data;
+        sessions = fixSessionData(data);
         showSessions();
         showCart();
     }).fail(function() {
