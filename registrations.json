@@ -1,0 +1,24 @@
+[
+  {
+    "attendeeId": "ATT1793651809424",
+    "fullName": "jane doe",
+    "email": "janedoe@psu.edu",
+    "participationType": "In-person",
+    "selectedSessions": [
+      "SES001"
+    ],
+    "attendanceConfirmed": true,
+    "comments": ""
+  },
+  {
+    "attendeeId": "ATT1793652137338",
+    "fullName": "Mylenna Choksi",
+    "email": "mvc6803@psu.edu",
+    "participationType": "Virtual",
+    "selectedSessions": [
+      "SES002"
+    ],
+    "attendanceConfirmed": true,
+    "comments": ""
+  }
+]
