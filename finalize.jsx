@@ -99,16 +99,18 @@ function ConferenceRegistration() {
       },
 
       error: function (xhr, status, error) {
-        console.error("Registration request failed:", xhr);
-        console.error("Status:", status);
-        console.error("Error:", error);
+        console.log("HTTP Status:", xhr.status);
+        console.log("Request Status:", status);
+        console.log("Error:", error);
+        console.log("Server Response:", xhr.responseText);
 
-        const errorMessage =
-          xhr.responseJSON && xhr.responseJSON.message
-            ? xhr.responseJSON.message
-            : "Unable to submit registration. Please try again.";
+        setMessage(
+          "Error " +
+            xhr.status +
+            ": " +
+            (xhr.responseText || error || "Unknown server error"),
+        );
 
-        setMessage(errorMessage);
         setMessageType("error");
       },
 

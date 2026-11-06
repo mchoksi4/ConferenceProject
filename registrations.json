@@ -20,5 +20,17 @@
     ],
     "attendanceConfirmed": true,
     "comments": ""
+  },
+  {
+    "attendeeId": "ATT1793934863227",
+    "fullName": "John smith",
+    "email": "johnsmith@psu.edu",
+    "participationType": "VIP",
+    "selectedSessions": [
+      "SES001",
+      "SES002"
+    ],
+    "attendanceConfirmed": true,
+    "comments": ""
   }
 ]
