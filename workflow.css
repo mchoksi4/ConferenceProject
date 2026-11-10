@@ -1,0 +1,30 @@
+
+/* Main page styling */
+body {
+  background: #f2f5fa;
+  color: #233247;
+}
+
+/* Submission form card */
+.workflow-card {
+  max-width: 850px;
+  margin: auto;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Approval proposal cards */
+.proposal-card {
+  border-left: 4px solid #0d6efd;
+}
+
+/* Preserve line breaks in abstracts */
+.abstract {
+  white-space: pre-wrap;
+}
+
+/* Allow navigation to wrap on small screens */
+.navbar-nav {
+  flex-wrap: wrap;
+}
