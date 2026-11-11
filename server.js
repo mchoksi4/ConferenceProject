@@ -1,283 +1,349 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
 
-const app = express();
-const PORT = 3000;
+//
+// BILLING AND RETURNS BACKEND
+//
 
-// Allow the server to read JSON requests
-app.use(express.json());
+const crypto = require("crypto");
 
-// Serve the website files
-app.use(express.static(__dirname));
-
-
-// ==========================================
-// CONFERENCE REGISTRATION
-// ==========================================
-
-// Receive conference registrations
-app.post("/api/registrations", (req, res) => {
-  const registration = req.body;
-
-  // Validate submitted information
-  if (
-    !registration.fullName ||
-    !registration.email ||
-    !registration.participationType ||
-    !Array.isArray(registration.selectedSessions) ||
-    registration.selectedSessions.length === 0 ||
-    registration.attendanceConfirmed !== true
-  ) {
-    return res.status(400).json({
-      message: "Registration information is incomplete."
-    });
-  }
-
-  const filePath = path.join(
-    __dirname,
-    "registrations.json"
-  );
-
-  let registrations = [];
-
-  // Load previous registrations
-  try {
-    if (fs.existsSync(filePath)) {
-      const fileData = fs.readFileSync(
-        filePath,
-        "utf8"
-      );
-
-      registrations = JSON.parse(fileData);
-
-      if (!Array.isArray(registrations)) {
-        registrations = [];
-      }
-    }
-  } catch (error) {
-    console.error(
-      "Error reading registration file:",
-      error
-    );
-
-    return res.status(500).json({
-      message: "Unable to read registration records."
-    });
-  }
-
-  // Add the new registration
-  registrations.push(registration);
-
-  // Save registrations to JSON file
-  try {
-    fs.writeFileSync(
-      filePath,
-      JSON.stringify(registrations, null, 2)
-    );
-  } catch (error) {
-    console.error(
-      "Error saving registration:",
-      error
-    );
-
-    return res.status(500).json({
-      message: "Unable to save registration."
-    });
-  }
-
-  // Send successful response
-  res.status(201).json({
-    message: "Registration successfully submitted!",
-    registration: registration
-  });
-});
-
-
-// ==========================================
-// SESSION PROPOSAL WORKFLOW
-// ==========================================
-
-// Location of the proposals JSON file
-const proposalFile = path.join(
+// JSON file locations
+const ordersFile = path.join(
   __dirname,
-  "proposals.json"
+  "billing-orders.json"
 );
 
+const returnsFile = path.join(
+  __dirname,
+  "return-requests.json"
+);
 
-// Read saved proposals
-function readProposals() {
-  if (!fs.existsSync(proposalFile)) {
+// Read JSON records
+function readArray(file) {
+
+  if (!fs.existsSync(file)) {
     return [];
   }
 
   const data = JSON.parse(
-    fs.readFileSync(proposalFile, "utf8")
+    fs.readFileSync(file, "utf8")
   );
 
-  return Array.isArray(data) ? data : [];
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid JSON storage");
+  }
+
+  return data;
 }
 
+// Save JSON records
+function writeArray(file, items) {
 
-// Save proposals to JSON
-function saveProposals(items) {
   fs.writeFileSync(
-    proposalFile,
+    file,
     JSON.stringify(items, null, 2)
   );
+
 }
 
 
 // ==========================================
-// GET - RETRIEVE PROPOSALS
+// BILLING REST API - POST
 // ==========================================
 
-app.get("/api/proposals", (req, res) => {
-  try {
-    const items = readProposals();
-    const status = req.query.status;
+app.post("/api/billing", (req, res) => {
 
-    if (status) {
-      const filtered = items.filter(
-        item => item.status === status
-      );
-
-      return res.json(filtered);
-    }
-
-    res.json(items);
-
-  } catch (error) {
-    res.status(500).json({
-      message: "Unable to load proposals."
-    });
-  }
-});
-
-
-// ==========================================
-// POST - SUBMIT NEW PROPOSAL
-// ==========================================
-
-app.post("/api/proposals", (req, res) => {
   const {
-    title,
-    abstract,
-    speaker,
-    category,
-    email
-  } = req.body;
+    fullName,
+    email,
+    address,
+    paymentMethod,
+    items
+  } = req.body || {};
 
-  // Validate submitted information
+  // Validate billing information
   if (
-    ![title, abstract, speaker, category, email].every(
+    !fullName ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || "") ||
+    !address ||
+    ![
+      address.street,
+      address.city,
+      address.state,
+      address.zip
+    ].every(
       value =>
         typeof value === "string" &&
         value.trim()
     ) ||
-    title.trim().length < 5 ||
-    abstract.trim().length < 30 ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    !paymentMethod ||
+    paymentMethod.type !== "Demo card (not charged)" ||
+    !/^\d{4}$/.test(paymentMethod.last4 || "") ||
+    !Array.isArray(items) ||
+    !items.length ||
+    !items.every(item =>
+      typeof item.id === "string" &&
+      typeof item.name === "string" &&
+      typeof item.price === "number" &&
+      Number.isFinite(item.price) &&
+      item.price >= 0
+    )
   ) {
+
     return res.status(400).json({
-      message:
-        "Please enter a valid title, abstract (30+ characters), speaker, category, and email."
+      message: "Invalid billing or order information."
     });
+
+  }
+
+  // Prevent saving sensitive payment information
+  if (
+    "cardNumber" in req.body ||
+    "securityCode" in req.body ||
+    "cvv" in req.body
+  ) {
+
+    return res.status(400).json({
+      message: "Do not send full payment credentials."
+    });
+
   }
 
   try {
-    const items = readProposals();
 
-    // Create the new proposal record
-    const proposal = {
-      id: require("crypto").randomUUID(),
-      title: title.trim(),
-      abstract: abstract.trim(),
-      speaker: speaker.trim(),
-      category: category.trim(),
-      email: email.trim(),
-      status: "pending",
-      submittedAt: new Date().toISOString(),
-      reviewedAt: null
+    const orders = readArray(ordersFile);
+
+    // Create order JSON
+    const order = {
+
+      id: crypto.randomUUID(),
+
+      fullName: String(fullName).trim(),
+
+      email: String(email).trim(),
+
+      address: address,
+
+      paymentMethod: {
+        type: paymentMethod.type,
+        last4: paymentMethod.last4
+      },
+
+      items: items,
+
+      total: Number(
+        items.reduce(
+          (sum, item) => sum + item.price,
+          0
+        ).toFixed(2)
+      ),
+
+      shipping: "Digital registration — no shipping",
+
+      status: "demo_order",
+
+      createdAt: new Date().toISOString()
+
     };
 
-    // Add the proposal to the list
-    items.push(proposal);
+    // Save new order
+    orders.push(order);
 
-    // Save the updated list
-    saveProposals(items);
+    writeArray(ordersFile, orders);
 
-    // Return successful response
+    // Return success message
     res.status(201).json({
-      message: "Proposal submitted for review!",
-      proposal: proposal
+      message: "Demo order saved. No payment was charged.",
+      order: order
     });
 
   } catch (error) {
+
     res.status(500).json({
-      message: "Unable to save proposal."
+      message: "Unable to save demo order."
     });
+
   }
+
 });
 
 
 // ==========================================
-// PATCH - APPROVE OR REJECT PROPOSAL
+// ORDERS REST API - GET
 // ==========================================
 
-app.patch("/api/proposals/:id", (req, res) => {
+app.get("/api/orders", (req, res) => {
 
-  // Make sure the status is valid
+  try {
+
+    const orders = readArray(ordersFile);
+
+    // Return order details for the Returns page
+    const orderList = orders.map(order => ({
+
+      id: order.id,
+
+      fullName: order.fullName,
+
+      items: order.items,
+
+      total: order.total
+
+    }));
+
+    res.json(orderList);
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: "Unable to load orders."
+    });
+
+  }
+
+});
+
+
+// ==========================================
+// RETURNS REST API - GET
+// ==========================================
+
+app.get("/api/returns", (req, res) => {
+
+  try {
+
+    const requests = readArray(returnsFile);
+
+    res.json(requests);
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: "Unable to load return requests."
+    });
+
+  }
+
+});
+
+
+// ==========================================
+// RETURNS REST API - POST
+// ==========================================
+
+app.post("/api/returns", (req, res) => {
+
+  const {
+    orderId,
+    itemId,
+    reason,
+    condition,
+    details
+  } = req.body || {};
+
+  // Validate return request
   if (
-    !["approved", "rejected"].includes(
-      req.body.status
+    !orderId ||
+    !itemId ||
+    typeof reason !== "string" ||
+    !reason.trim() ||
+    !["unused", "partially_used"].includes(condition) ||
+    (
+      details !== undefined &&
+      (
+        typeof details !== "string" ||
+        details.length > 500
+      )
     )
   ) {
+
     return res.status(400).json({
-      message: "Status must be approved or rejected."
+      message: "Provide an order, session, reason, and condition."
     });
+
   }
 
   try {
-    const items = readProposals();
 
-    // Find the selected proposal
-    const proposal = items.find(
-      item => item.id === req.params.id
+    // Find the original order
+    const orders = readArray(ordersFile);
+
+    const order = orders.find(
+      order => order.id === orderId
     );
 
-    // Check whether the proposal exists
-    if (!proposal) {
+    // Find the session being returned
+    const item = order && order.items.find(
+      item => item.id === itemId
+    );
+
+    if (!item) {
+
       return res.status(404).json({
-        message: "Proposal not found."
+        message: "Order or session not found."
       });
+
     }
 
-    // Prevent reviewing a proposal twice
-    if (proposal.status !== "pending") {
+    const requests = readArray(returnsFile);
+
+    // Prevent duplicate return requests
+    const duplicate = requests.some(
+      request =>
+        request.orderId === orderId &&
+        request.itemId === itemId
+    );
+
+    if (duplicate) {
+
       return res.status(409).json({
-        message: "Proposal has already been reviewed."
+        message: "A return request already exists for this session."
       });
+
     }
 
-    // Update proposal status
-    proposal.status = req.body.status;
-    proposal.reviewedAt = new Date().toISOString();
+    // Create return request JSON
+    const request = {
 
-    // Save the changes
-    saveProposals(items);
+      id: crypto.randomUUID(),
 
-    // Return updated proposal
-    res.json({
-      message: `Proposal ${proposal.status}.`,
-      proposal: proposal
+      orderId: orderId,
+
+      itemId: itemId,
+
+      productName: item.name,
+
+      price: item.price,
+
+      reason: reason.trim(),
+
+      condition: condition,
+
+      details: details || "",
+
+      status: "pending",
+
+      createdAt: new Date().toISOString()
+
+    };
+
+    // Save return request
+    requests.push(request);
+
+    writeArray(returnsFile, requests);
+
+    // Return success response
+    res.status(201).json({
+      message: "Return request submitted.",
+      request: request
     });
 
   } catch (error) {
+
     res.status(500).json({
-      message: "Unable to update proposal."
+      message: "Unable to save return request."
     });
+
   }
+
 });
 
 
@@ -286,7 +352,9 @@ app.patch("/api/proposals/:id", (req, res) => {
 // ==========================================
 
 app.listen(PORT, () => {
+
   console.log(
-    `College Career Conference server running at http://localhost:${PORT}`
+    `Conference server running at http://localhost:${PORT}`
   );
+
 });
