@@ -1,0 +1,30 @@
+
+/* Main Page Styling */
+body {
+  background: #f3f6fa;
+  color: #243449;
+}
+
+/* Billing and Returns Cards */
+.commerce-card {
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.07);
+}
+
+/* Order Summary Total */
+.summary-total {
+  border-top: 1px solid #ddd;
+  padding-top: 12px;
+  font-weight: 700;
+}
+
+/* Form Labels */
+.form-label {
+  font-weight: 600;
+}
+
+/* Responsive Navigation */
+.navbar-nav {
+  flex-wrap: wrap;
+}
