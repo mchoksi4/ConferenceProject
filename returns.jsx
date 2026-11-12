@@ -9,7 +9,6 @@ function ReturnsPage() {
   const [orderId, setOrderId] = useState("");
   const [itemId, setItemId] = useState("");
   const [reason, setReason] = useState("");
-  const [condition, setCondition] = useState("unused");
   const [details, setDetails] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
@@ -80,14 +79,13 @@ function ReturnsPage() {
     if (
       !orderId ||
       !itemId ||
-      !reason.trim() ||
-      !condition
+      !reason.trim() 
     ) {
 
       setError(true);
 
       setMessage(
-        "Choose an order and session, then provide a reason and condition."
+        "Choose an order and session, then provide a reason for cancellation."
       );
 
       return;
@@ -112,8 +110,6 @@ function ReturnsPage() {
 
         reason: reason.trim(),
 
-        condition: condition,
-
         details: details.trim()
 
       }),
@@ -129,7 +125,6 @@ function ReturnsPage() {
 
         // Clear form values
         setReason("");
-        setCondition("unused");
         setDetails("");
 
       },
@@ -320,36 +315,6 @@ function ReturnsPage() {
 
               <option value="Other">
                 Other
-              </option>
-
-            </select>
-
-          </div>
-
-          {/* Registration Condition */}
-          <div className="mb-3">
-
-            <label
-              className="form-label"
-              htmlFor="condition"
-            >
-              Registration Condition
-            </label>
-
-            <select
-              id="condition"
-              className="form-select"
-              required
-              value={condition}
-              onChange={e => setCondition(e.target.value)}
-            >
-
-              <option value="unused">
-                Unused — did not attend
-              </option>
-
-              <option value="partially_used">
-                Partially used — attended some sessions
               </option>
 
             </select>
