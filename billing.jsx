@@ -1,8 +1,6 @@
-
 const { useState, useEffect } = React;
 
 function BillingPage() {
-
   // Billing form information
   const [form, setForm] = useState({
     fullName: "",
@@ -13,7 +11,7 @@ function BillingPage() {
     zip: "",
     cardNumber: "",
     expiration: "",
-    securityCode: ""
+    securityCode: "",
   });
 
   // React state variables
@@ -24,42 +22,31 @@ function BillingPage() {
 
   // Load the existing conference cart
   useEffect(() => {
-
     try {
-
       const sessions = JSON.parse(
-        localStorage.getItem("conferenceSessions") || "[]"
+        localStorage.getItem("conferenceSessions") || "[]",
       );
 
-      const cart = JSON.parse(
-        localStorage.getItem("conferenceCart") || "[]"
-      );
+      const cart = JSON.parse(localStorage.getItem("conferenceCart") || "[]");
 
       const cartItems = cart
-        .map(id => sessions.find(s => s.id === id))
+        .map((id) => sessions.find((s) => s.id === id))
         .filter(Boolean)
-        .map(s => ({
+        .map((s) => ({
           id: s.id,
           name: s.description,
-          price: Number(s.price) || 0
+          price: Number(s.price) || 0,
         }));
 
       setItems(cartItems);
-
     } catch (e) {
-
       setMessage("Unable to read the conference cart.");
       setError(true);
-
     }
-
   }, []);
 
   // Calculate the total price
-  const total = items.reduce(
-    (sum, item) => sum + item.price,
-    0
-  );
+  const total = items.reduce((sum, item) => sum + item.price, 0);
 
   // Format prices
   function money(amount) {
@@ -68,46 +55,37 @@ function BillingPage() {
 
   // Update input fields
   function change(event) {
+    const { name, value } = event.target;
 
-    setForm({
-      ...form,
-      [event.target.name]: event.target.value
-    });
-
+    setForm((old) => ({
+      ...old,
+      [name]: value,
+    }));
   }
 
   // Submit billing information
   function submit(event) {
-
     event.preventDefault();
 
     // Remove spaces and dashes from card number
-    const digits = form.cardNumber.replace(
-      /\s|-/g,
-      ""
-    );
+    const digits = form.cardNumber.replace(/[\s-]/g, "");
 
-    // Validate expiration format
-    const expiry = /^(0[1-9]|1[0-2])\/(\d{2})$/.exec(
-      form.expiration
-    );
+    // Validate expiration format (MM/YY)
+    const expiry = /^(0[1-9]|1[0-2])\/(\d{2})$/.exec(form.expiration.trim());
 
-    // Check expiration date
-    const validExpiry = expiry && (() => {
+    // Check that the expiration date has not passed
+    const validExpiry =
+      expiry &&
+      (() => {
+        const year = 2000 + Number(expiry[2]);
+        const month = Number(expiry[1]);
+        const now = new Date();
 
-      const year = 2000 + Number(expiry[2]);
-      const month = Number(expiry[1]);
-      const now = new Date();
-
-      return (
-        year > now.getFullYear() ||
-        (
-          year === now.getFullYear() &&
-          month >= now.getMonth() + 1
-        )
-      );
-
-    })();
+        return (
+          year > now.getFullYear() ||
+          (year === now.getFullYear() && month >= now.getMonth() + 1)
+        );
+      })();
 
     // Validate all required fields
     if (
@@ -116,11 +94,10 @@ function BillingPage() {
       !validExpiry ||
       !/^\d{3,4}$/.test(form.securityCode)
     ) {
-
       setError(true);
 
       setMessage(
-        "Check all required fields, card number, expiration (MM/YY), and security code."
+        "Check all required fields, card number, expiration (MM/YY), and security code.",
       );
 
       return;
@@ -128,12 +105,9 @@ function BillingPage() {
 
     // Make sure the cart is not empty
     if (items.length === 0) {
-
       setError(true);
 
-      setMessage(
-        "Your cart is empty. Add a session before checkout."
-      );
+      setMessage("Your cart is empty. Add a session before checkout.");
 
       return;
     }
@@ -141,128 +115,100 @@ function BillingPage() {
     // Create billing JSON object
     // Demo only: do not send full card details
     const payload = {
-
       fullName: form.fullName.trim(),
-
       email: form.email.trim(),
 
       address: {
         street: form.address.trim(),
         city: form.city.trim(),
         state: form.state.trim(),
-        zip: form.zip.trim()
+        zip: form.zip.trim(),
       },
 
       paymentMethod: {
         type: "Demo card (not charged)",
-        last4: digits.slice(-4)
+        last4: digits.slice(-4),
       },
 
-      items: items.map(item => ({
+      items: items.map((item) => ({
         id: item.id,
         name: item.name,
-        price: item.price
-      }))
-
+        price: item.price,
+      })),
     };
 
     setBusy(true);
+    setMessage("");
 
     // AJAX POST request
     $.ajax({
-
       url: "/api/billing",
-
       method: "POST",
-
       contentType: "application/json",
-
       data: JSON.stringify(payload),
 
-      success: function(response) {
-
+      success: function (response) {
         setError(false);
 
         setMessage(
           "Demo order saved! Order ID: " +
-          response.order.id +
-          ". Use this ID on the Returns page."
+            response.order.id +
+            ". Use this ID on the Returns page.",
         );
 
         // Clear payment fields
-        setForm(old => ({
+        setForm((old) => ({
           ...old,
           cardNumber: "",
           expiration: "",
-          securityCode: ""
+          securityCode: "",
         }));
 
         // Clear the cart
         localStorage.removeItem("conferenceCart");
 
         setItems([]);
-
       },
 
-      error: function(xhr) {
-
+      error: function (xhr) {
         setError(true);
 
-        setMessage(
-          xhr.responseJSON?.message ||
-          "Could not save demo order."
-        );
-
+        setMessage(xhr.responseJSON?.message || "Could not save demo order.");
       },
 
-      complete: function() {
+      complete: function () {
         setBusy(false);
-      }
-
+      },
     });
-
   }
 
   return (
-
     <div className="row g-4">
-
       {/* Billing Form */}
       <div className="col-lg-8">
-
         <div className="card commerce-card">
-
           <div className="card-body p-4">
-
-            <h1 className="h3">
-              Billing Details
-            </h1>
+            <h1 className="h3">Billing Details</h1>
 
             <p className="text-muted">
-              Classroom demonstration only.
-              No payments are processed.
-              Use fictional card details.
+              Classroom demonstration only. No payments are processed. Use
+              fictional card details.
             </p>
 
             {/* Status Message */}
             {message && (
-
               <div
                 role="alert"
                 className={
-                  "alert " +
-                  (error ? "alert-danger" : "alert-success")
+                  "alert " + (error ? "alert-danger" : "alert-success")
                 }
               >
                 {message}
               </div>
-
             )}
 
             <form onSubmit={submit}>
-
               <div className="row g-3">
-
                 {/* Form Fields */}
                 {[
                   ["fullName", "Full Name", "text", "col-md-6"],
@@ -273,16 +219,15 @@ function BillingPage() {
                   ["zip", "ZIP Code", "text", "col-md-4"],
                   ["cardNumber", "Demo Card Number", "text", "col-12"],
                   ["expiration", "Expiration (MM/YY)", "text", "col-md-6"],
-                  ["securityCode", "Demo Security Code", "password", "col-md-6"]
-
+                  [
+                    "securityCode",
+                    "Demo Security Code",
+                    "password",
+                    "col-md-6",
+                  ],
                 ].map(([name, label, type, width]) => (
-
                   <div className={width} key={name}>
-
-                    <label
-                      className="form-label"
-                      htmlFor={name}
-                    >
+                    <label className="form-label" htmlFor={name}>
                       {label}
                     </label>
 
@@ -292,25 +237,35 @@ function BillingPage() {
                       type={type}
                       required
                       className="form-control"
-                      autoComplete={
-                        name === "cardNumber" ||
-                        name === "securityCode"
-                          ? "off"
+                      autoComplete="off"
+                      inputMode={
+                        ["cardNumber", "securityCode", "zip"].includes(name)
+                          ? "numeric"
                           : undefined
+                      }
+                      maxLength={
+                        name === "expiration"
+                          ? 5
+                          : name === "securityCode"
+                            ? 4
+                            : name === "zip"
+                              ? 10
+                              : name === "cardNumber"
+                                ? 23
+                                : undefined
                       }
                       placeholder={
                         name === "expiration"
                           ? "MM/YY"
-                          : undefined
+                          : name === "cardNumber"
+                            ? "Fictional card number"
+                            : undefined
                       }
                       value={form[name]}
                       onChange={change}
                     />
-
                   </div>
-
                 ))}
-
               </div>
 
               {/* Submit Button */}
@@ -321,80 +276,47 @@ function BillingPage() {
               >
                 {busy ? "Saving..." : "Place Demo Order"}
               </button>
-
             </form>
-
           </div>
         </div>
       </div>
 
       {/* Order Summary */}
       <div className="col-lg-4">
-
         <div className="card commerce-card">
-
           <div className="card-body p-4">
-
-            <h2 className="h5">
-              Order Summary
-            </h2>
+            <h2 className="h5">Order Summary</h2>
 
             {items.length === 0 ? (
-
               <p className="text-muted">
-                No sessions in your cart.
-                Visit the Cart page first.
+                No sessions in your cart. Visit the Cart page first.
               </p>
-
             ) : (
-
               items.map((item, i) => (
+                <div className="d-flex justify-content-between mb-2" key={i}>
+                  <span>{item.name}</span>
 
-                <div
-                  className="d-flex justify-content-between mb-2"
-                  key={i}
-                >
-
-                  <span>
-                    {item.name}
-                  </span>
-
-                  <span>
-                    {money(item.price)}
-                  </span>
-
+                  <span>{money(item.price)}</span>
                 </div>
-
               ))
-
             )}
 
             {/* Total Amount */}
             <div className="d-flex justify-content-between summary-total">
-
               <span>Total</span>
 
-              <span>
-                {money(total)}
-              </span>
-
+              <span>{money(total)}</span>
             </div>
 
             <p className="small text-muted mt-3">
-              Digital conference registration —
-              no shipping required.
+              Digital conference registration — no shipping required.
             </p>
-
           </div>
         </div>
       </div>
-
     </div>
-
   );
-
 }
 
-ReactDOM.createRoot(
-  document.getElementById("root")
-).render(<BillingPage />);
+// Render Billing Page
+ReactDOM.createRoot(document.getElementById("root")).render(<BillingPage />);

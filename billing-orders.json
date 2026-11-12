@@ -1,1 +1,33 @@
-[]
+[
+  {
+    "id": "afe3e2b7-69a0-4442-b40d-a31602faab73",
+    "fullName": "Mylenna Choksi",
+    "email": "mvc6803@psu.edu",
+    "address": {
+      "street": "123 Main Street",
+      "city": "Charlotte",
+      "state": "NC",
+      "zip": "123456"
+    },
+    "paymentMethod": {
+      "type": "Demo card (not charged)",
+      "last4": "3456"
+    },
+    "items": [
+      {
+        "id": "SES001",
+        "name": "Registration & Networking",
+        "price": 0
+      },
+      {
+        "id": "SES002",
+        "name": "Career Success Workshop",
+        "price": 0
+      }
+    ],
+    "total": 0,
+    "shipping": "Digital registration — no shipping",
+    "status": "demo_order",
+    "createdAt": "2026-11-12T06:59:53.537Z"
+  }
+]
