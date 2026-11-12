@@ -249,7 +249,6 @@ app.post("/api/returns", (req, res) => {
     orderId,
     itemId,
     reason,
-    condition,
     details
   } = req.body || {};
 
@@ -259,7 +258,6 @@ app.post("/api/returns", (req, res) => {
     !itemId ||
     typeof reason !== "string" ||
     !reason.trim() ||
-    !["unused", "partially_used"].includes(condition) ||
     (
       details !== undefined &&
       (
@@ -328,8 +326,6 @@ app.post("/api/returns", (req, res) => {
       price: item.price,
 
       reason: reason.trim(),
-
-      condition: condition,
 
       details: details || "",
 
